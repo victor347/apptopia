@@ -18,6 +18,10 @@ public class Utils {
     public final static String MONGO_IMPORT_APPS_GOOGLE = "mongoimport -d apptopia -c apps_google --mode upsert --upsertFields id --file ";
     public final static String MONGO_IMPORT_PUBLISHER_APPLE = "mongoimport -d apptopia -c publishers_apple --mode upsert --upsertFields id --file ";
     public final static String MONGO_IMPORT_PUBLISHER_GOOGLE = "mongoimport -d apptopia -c publishers_google --mode upsert --upsertFields id --file ";
+    public final static String MONGO_IMPORT_RATINGS_APPLE = "mongoimport -d apptopia -c ratings_apple --mode upsert --upsertFields id,country_iso,date --file ";
+    public final static String MONGO_IMPORT_RATINGS_GOOGLE = "mongoimport -d apptopia -c ratings_google --mode upsert --upsertFields id,country_iso,date --file ";
+    public final static String MONGO_IMPORT_APP_ESTIMATES_APPLE = "mongoimport -d apptopia -c app_estimates_apple --mode upsert --upsertFields id,country_iso,date --file ";
+    public final static String MONGO_IMPORT_APP_ESTIMATES_GOOGLE = "mongoimport -d apptopia -c app_estimates_google --mode upsert --upsertFields id,country_iso,date --file ";
 
     private static final Logger log = LoggerFactory.getLogger(Utils.class);
     private static Properties props;

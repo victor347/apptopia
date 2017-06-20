@@ -50,10 +50,10 @@ public class Application {
 					Utils.getProperties().getProperty("apple-data-dumps-service"),
 					"app_general_data",
 					"",
-					getDate(1),
-					getDate(1));
+					getDate(2),
+					getDate(2));
 			log.info("Numero de archivos a descargar en Apps Apple " + bulk.length);
-
+/*
 			importFilesMongo(bulk, "AppsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APPS_APPLE);
 
 			//Apps google
@@ -62,8 +62,8 @@ public class Application {
 					Utils.getProperties().getProperty("google-data-dumps-service"),
 					"app_general_data",
 					"",
-					getDate(1),
-					getDate(1));
+					getDate(2),
+					getDate(2));
 			log.info("Numero de archivos a descargar en Apps Google " + bulk.length);
 
 			importFilesMongo(bulk, "AppsGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APPS_GOOGLE);
@@ -74,8 +74,8 @@ public class Application {
 					Utils.getProperties().getProperty("apple-data-dumps-service"),
 					"publisher_general_data",
 					"",
-					getDate(1),
-					getDate(1));
+					getDate(2),
+					getDate(2));
 			log.info("Numero de archivos a descargar en Publishers Apple " + bulk.length);
 
 			importFilesMongo(bulk, "PublishersApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_APPLE);
@@ -86,11 +86,60 @@ public class Application {
 					Utils.getProperties().getProperty("google-data-dumps-service"),
 					"publisher_general_data",
 					"",
-					getDate(1),
-					getDate(1));
+					getDate(2),
+					getDate(2));
 			log.info("Numero de archivos a descargar en Publisher Google " + bulk.length);
 
 			importFilesMongo(bulk, "PublishersGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_GOOGLE);
+
+			//Ratings apple
+			bulk=null;
+			bulk = getDataDumps(restTemplate,
+					Utils.getProperties().getProperty("apple-data-dumps-service"),
+					"daily_app_ratings",
+					"",
+					"2017-01-01",
+					getDate(0));
+			log.info("Numero de archivos a descargar en Ratings Apple " + bulk.length);
+
+			importFilesMongo(bulk, "RatingsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_RATINGS_APPLE);
+
+			//Ratings google
+			bulk=null;
+			bulk = getDataDumps(restTemplate,
+					Utils.getProperties().getProperty("google-data-dumps-service"),
+					"daily_app_ratings",
+					"",
+					"2017-01-01",
+					getDate(0));
+			log.info("Numero de archivos a descargar en Ratings Google " + bulk.length);
+
+			importFilesMongo(bulk, "RatingsGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_RATINGS_GOOGLE);
+
+
+			//app estimates apple
+			bulk=null;
+			bulk = getDataDumps(restTemplate,
+					Utils.getProperties().getProperty("apple-data-dumps-service"),
+					"daily_app_estimates",
+					"",
+					"2017-01-01",
+					getDate(0));
+			log.info("Numero de archivos a descargar en App Estimates Apple " + bulk.length);
+
+			importFilesMongo(bulk, "AppEstimatesApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_APPLE);
+*/
+			//app estimates google
+			bulk=null;
+			bulk = getDataDumps(restTemplate,
+					Utils.getProperties().getProperty("google-data-dumps-service"),
+					"daily_app_estimates",
+					"",
+					"2017-01-01",
+					getDate(0));
+			log.info("Numero de archivos a descargar en App Estimates Google " + bulk.length);
+
+			importFilesMongo(bulk, "AppEstimatesGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_GOOGLE);
 		};
 	}
 
@@ -124,6 +173,10 @@ public class Application {
 
 			executeCommand(command + dir + file + i);
 		}
+		if (directory.delete())
+			log.info("Carpeta " + directory.toString() + " borrada exitosamente");
+		else
+			log.error("Carpeta " + directory.toString() + " no se pudo borrar");
 	}
 
 	private Bulk[] getDataDumps(RestTemplate restTemplate, String service, String dataset, String interval, String dateFrom, String date_to){
