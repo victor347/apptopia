@@ -1,7 +1,7 @@
 package client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,19 +12,20 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-
-import javax.rmi.CORBA.Util;
 import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Properties;
 
 @SpringBootApplication
 public class Application {
 
-	private static final Logger log = LoggerFactory.getLogger(Application.class);
+	//private static final Logger log = LoggerFactory.getLogger(Application.class);
+	private static final Logger log = LogManager.getLogger(Application.class.getName());
 	Login login;
 
 	public static void main(String args[]) {
@@ -53,7 +54,7 @@ public class Application {
 					getDate(2),
 					getDate(2));
 			log.info("Numero de archivos a descargar en Apps Apple " + bulk.length);
-/*
+
 			importFilesMongo(bulk, "AppsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APPS_APPLE);
 
 			//Apps google
@@ -128,7 +129,7 @@ public class Application {
 			log.info("Numero de archivos a descargar en App Estimates Apple " + bulk.length);
 
 			importFilesMongo(bulk, "AppEstimatesApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_APPLE);
-*/
+
 			//app estimates google
 			bulk=null;
 			bulk = getDataDumps(restTemplate,
@@ -140,6 +141,32 @@ public class Application {
 			log.info("Numero de archivos a descargar en App Estimates Google " + bulk.length);
 
 			importFilesMongo(bulk, "AppEstimatesGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_GOOGLE);
+
+			//publisher estimates apple
+			bulk=null;
+			bulk = getDataDumps(restTemplate,
+					Utils.getProperties().getProperty("apple-data-dumps-service"),
+					"daily_publisher_estimates",
+					"",
+					"2017-01-01",
+					getDate(0));
+			log.info("Numero de archivos a descargar en Publisher Estimates Apple " + bulk.length);
+
+			importFilesMongo(bulk, "PublisherEstimatesApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_ESTIMATES_APPLE);
+
+			//publisher estimates google
+			bulk=null;
+			bulk = getDataDumps(restTemplate,
+					Utils.getProperties().getProperty("google-data-dumps-service"),
+					"daily_publisher_estimates",
+					"",
+					"2017-01-01",
+					getDate(0));
+			log.info("Numero de archivos a descargar en Publisher Estimates Google " + bulk.length);
+
+			importFilesMongo(bulk, "PublisherEstimatesGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_ESTIMATES_GOOGLE);
+
+			log.info("Import Successful!!");
 		};
 	}
 
@@ -172,6 +199,16 @@ public class Application {
 			}
 
 			executeCommand(command + dir + file + i);
+
+			try {
+
+				Files.delete(Paths.get(dir+file+i));
+				log.info("File "+ file + i + " deleted");
+			}
+			catch (IOException e) {
+				log.error("exception happened - here's what I know: ");
+				e.printStackTrace();
+			}
 		}
 		if (directory.delete())
 			log.info("Carpeta " + directory.toString() + " borrada exitosamente");
@@ -229,7 +266,7 @@ public class Application {
 			}
 
 			// read any errors from the attempted command
-			log.info("Here is the standard error output of the command (if any): " + command);
+			log.info("Here is the standard second output of the command (if any): " + command);
 			while ((s = stdError.readLine()) != null) {
 				log.info(s);
 			}

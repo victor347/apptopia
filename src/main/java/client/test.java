@@ -16,17 +16,14 @@ public class test {
 
     public test() {
 
+        File directory = new File("PublishersApple-600-2017-06-20");
+
+        if (directory.delete())
+            System.out.println("Carpeta " + directory.toString() + " borrada exitosamente");
+        else
+            System.out.println("Carpeta " + directory.toString() + " no se pudo borrar");
 
 
-        String domainName = "google.com";
-
-        //in mac oxs
-        String command = "mongoimport -d test -c ratings --file Apps-7-5-2017\\part50";
-
-
-        String output = executeCommand(command);
-
-        System.out.println(output);
 
     }
 
