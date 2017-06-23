@@ -19,7 +19,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
-import java.util.Properties;
 
 @SpringBootApplication
 public class Application {
@@ -43,128 +42,140 @@ public class Application {
 	public CommandLineRunner run(RestTemplate restTemplate)  {
 		return args -> {
 
+			Bulk[] bulk = null;
+
 			login = login(restTemplate);
 			log.info(login.toString());
 
-			//Apps apple
-			Bulk[] bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("apple-data-dumps-service"),
-					"app_general_data",
-					"",
-					getDate(2),
-					getDate(2));
-			log.info("Numero de archivos a descargar en Apps Apple " + bulk.length);
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-apps-apple"))){
 
-			importFilesMongo(bulk, "AppsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APPS_APPLE);
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("apple-data-dumps-service"),
+						"app_general_data",
+						"",
+						getDate(2),
+						getDate(2));
+				log.info("Numero de archivos a descargar en Apps Apple " + bulk.length);
 
-			//Apps google
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("google-data-dumps-service"),
-					"app_general_data",
-					"",
-					getDate(2),
-					getDate(2));
-			log.info("Numero de archivos a descargar en Apps Google " + bulk.length);
+				importFilesMongo(bulk, "AppsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APPS_APPLE, Integer.parseInt(Utils.getProperties().getProperty("start-apps-apple")), Integer.parseInt(Utils.getProperties().getProperty("end-apps-apple")));
+			}
 
-			importFilesMongo(bulk, "AppsGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APPS_GOOGLE);
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-apps-google"))){
 
-			//Publishers apple
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("apple-data-dumps-service"),
-					"publisher_general_data",
-					"",
-					getDate(2),
-					getDate(2));
-			log.info("Numero de archivos a descargar en Publishers Apple " + bulk.length);
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("google-data-dumps-service"),
+						"app_general_data",
+						"",
+						getDate(2),
+						getDate(2));
+				log.info("Numero de archivos a descargar en Apps Google " + bulk.length);
 
-			importFilesMongo(bulk, "PublishersApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_APPLE);
+				importFilesMongo(bulk, "AppsGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APPS_GOOGLE, Integer.parseInt(Utils.getProperties().getProperty("start-apps-google")), Integer.parseInt(Utils.getProperties().getProperty("end-apps-google")));
+			}
 
-			//Publishers google
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("google-data-dumps-service"),
-					"publisher_general_data",
-					"",
-					getDate(2),
-					getDate(2));
-			log.info("Numero de archivos a descargar en Publisher Google " + bulk.length);
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-publishers-apple"))){
 
-			importFilesMongo(bulk, "PublishersGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_GOOGLE);
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("apple-data-dumps-service"),
+						"publisher_general_data",
+						"",
+						getDate(2),
+						getDate(2));
+				log.info("Numero de archivos a descargar en Publishers Apple " + bulk.length);
 
-			//Ratings apple
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("apple-data-dumps-service"),
-					"daily_app_ratings",
-					"",
-					"2017-01-01",
-					getDate(0));
-			log.info("Numero de archivos a descargar en Ratings Apple " + bulk.length);
+				importFilesMongo(bulk, "PublishersApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_APPLE, Integer.parseInt(Utils.getProperties().getProperty("start-publisher-apple")), Integer.parseInt(Utils.getProperties().getProperty("end-publisher-apple")));
+			}
 
-			importFilesMongo(bulk, "RatingsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_RATINGS_APPLE);
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-publishers-google"))){
 
-			//Ratings google
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("google-data-dumps-service"),
-					"daily_app_ratings",
-					"",
-					"2017-01-01",
-					getDate(0));
-			log.info("Numero de archivos a descargar en Ratings Google " + bulk.length);
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("google-data-dumps-service"),
+						"publisher_general_data",
+						"",
+						getDate(2),
+						getDate(2));
+				log.info("Numero de archivos a descargar en Publisher Google " + bulk.length);
 
-			importFilesMongo(bulk, "RatingsGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_RATINGS_GOOGLE);
+				importFilesMongo(bulk, "PublishersGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_GOOGLE, Integer.parseInt(Utils.getProperties().getProperty("start-publisher-google")), Integer.parseInt(Utils.getProperties().getProperty("end-publisher-google")));
+			}
 
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-ratings-apple"))){
 
-			//app estimates apple
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("apple-data-dumps-service"),
-					"daily_app_estimates",
-					"",
-					"2017-01-01",
-					getDate(0));
-			log.info("Numero de archivos a descargar en App Estimates Apple " + bulk.length);
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("apple-data-dumps-service"),
+						"daily_app_ratings",
+						"",
+						"2017-01-01",
+						getDate(0));
+				log.info("Numero de archivos a descargar en Ratings Apple " + bulk.length);
 
-			importFilesMongo(bulk, "AppEstimatesApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_APPLE);
+				importFilesMongo(bulk, "RatingsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_RATINGS_APPLE, Integer.parseInt(Utils.getProperties().getProperty("start-ratings-apple")), Integer.parseInt(Utils.getProperties().getProperty("end-ratings-apple")));
+			}
 
-			//app estimates google
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("google-data-dumps-service"),
-					"daily_app_estimates",
-					"",
-					"2017-01-01",
-					getDate(0));
-			log.info("Numero de archivos a descargar en App Estimates Google " + bulk.length);
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-ratings-google"))){
 
-			importFilesMongo(bulk, "AppEstimatesGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_GOOGLE);
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("google-data-dumps-service"),
+						"daily_app_ratings",
+						"",
+						"2017-01-01",
+						getDate(0));
+				log.info("Numero de archivos a descargar en Ratings Google " + bulk.length);
 
-			//publisher estimates apple
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("apple-data-dumps-service"),
-					"daily_publisher_estimates",
-					"",
-					"2017-01-01",
-					getDate(0));
-			log.info("Numero de archivos a descargar en Publisher Estimates Apple " + bulk.length);
+				importFilesMongo(bulk, "RatingsGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_RATINGS_GOOGLE, Integer.parseInt(Utils.getProperties().getProperty("start-ratings-google")), Integer.parseInt(Utils.getProperties().getProperty("end-ratings-google")));
+			}
 
-			importFilesMongo(bulk, "PublisherEstimatesApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_ESTIMATES_APPLE);
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-app-estimates-apple"))){
 
-			//publisher estimates google
-			bulk=null;
-			bulk = getDataDumps(restTemplate,
-					Utils.getProperties().getProperty("google-data-dumps-service"),
-					"daily_publisher_estimates",
-					"",
-					"2017-01-01",
-					getDate(0));
-			log.info("Numero de archivos a descargar en Publisher Estimates Google " + bulk.length);
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("apple-data-dumps-service"),
+						"daily_app_estimates",
+						"",
+						"2017-01-01",
+						getDate(0));
+				log.info("Numero de archivos a descargar en App Estimates Apple " + bulk.length);
 
-			importFilesMongo(bulk, "PublisherEstimatesGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_ESTIMATES_GOOGLE);
+				importFilesMongo(bulk, "AppEstimatesApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_APPLE, Integer.parseInt(Utils.getProperties().getProperty("start-app-estimates-apple")), Integer.parseInt(Utils.getProperties().getProperty("end-app-estimates-apple")));
+			}
+
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-app-estimates-google"))){
+
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("google-data-dumps-service"),
+						"daily_app_estimates",
+						"",
+						"2017-01-01",
+						getDate(0));
+				log.info("Numero de archivos a descargar en App Estimates Google " + bulk.length);
+
+				importFilesMongo(bulk, "AppEstimatesGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_APP_ESTIMATES_GOOGLE, Integer.parseInt(Utils.getProperties().getProperty("start-app-estimates-google")), Integer.parseInt(Utils.getProperties().getProperty("end-app-estimates-google")));
+			}
+
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-publisher-estimates-apple"))){
+
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("apple-data-dumps-service"),
+						"daily_publisher_estimates",
+						"",
+						"2017-01-01",
+						getDate(0));
+				log.info("Numero de archivos a descargar en Publisher Estimates Apple " + bulk.length);
+
+				importFilesMongo(bulk, "PublisherEstimatesApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_ESTIMATES_APPLE, Integer.parseInt(Utils.getProperties().getProperty("start-publisher-estimates-apple")), Integer.parseInt(Utils.getProperties().getProperty("end-publisher-estimates-apple")));
+			}
+
+			if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-publisher-estimates-google"))){
+
+				bulk = getDataDumps(restTemplate,
+						Utils.getProperties().getProperty("google-data-dumps-service"),
+						"daily_publisher_estimates",
+						"",
+						"2017-01-01",
+						getDate(0));
+				log.info("Numero de archivos a descargar en Publisher Estimates Google " + bulk.length);
+
+				importFilesMongo(bulk, "PublisherEstimatesGoogle-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_PUBLISHER_ESTIMATES_GOOGLE, Integer.parseInt(Utils.getProperties().getProperty("start-publisher-estimates-google")), Integer.parseInt(Utils.getProperties().getProperty("end-publisher-estimates-google")));
+			}
 
 			log.info("Import Successful!!");
 		};
@@ -177,12 +188,22 @@ public class Application {
 		return c.get(Calendar.YEAR)+"-"+((c.get(Calendar.MONTH)+1) < 10 ? "0" : "")+(c.get(Calendar.MONTH)+1)+"-"+((c.get(Calendar.DATE)-days) < 10 ? "0" : "")+(c.get(Calendar.DATE)-days);
 	}
 
-	private void importFilesMongo(Bulk[] bulk,String dir, String file, String command){
+	private void importFilesMongo(Bulk[] bulk, String dir, String file, String command, int start, int end){
 
 		File directory = new File(dir)	;
 		directory.mkdir();
+		int limit = 0;
 
-		for(int i =0; i<bulk.length; i++){
+		if(end==0){
+			limit = bulk.length;
+		}
+		else{
+
+			limit = end;
+			log.info("Limite de descargas configurado: "+ limit);
+		}
+
+		for(int i =start; i<limit; i++){
 
 			try {
 				URL website = new URL(bulk[i].getUrl());
@@ -224,7 +245,7 @@ public class Application {
 		HttpEntity<String> entity = new HttpEntity<String>(null,headers);
 
 		ResponseEntity<Bulk []> response = restTemplate.exchange(Utils.getProperties().getProperty("host-apptopia")+
-				service+"?dataset="+dataset+
+						service+"?dataset="+dataset+
 						"&date_from="+dateFrom+
 						"&date_to="+date_to+
 						(interval.equals("") ? "" : ("&interval="+interval))
@@ -237,9 +258,9 @@ public class Application {
 	private Login login(RestTemplate restTemplate){
 
 		return restTemplate.postForObject(Utils.getProperties().getProperty("host-apptopia")+
-				Utils.getProperties().getProperty("login-service")+
-				"?client="+Utils.getProperties().getProperty("client-apptopia")+
-				"&secret="+Utils.getProperties().getProperty("secret-apptopia"),
+						Utils.getProperties().getProperty("login-service")+
+						"?client="+Utils.getProperties().getProperty("client-apptopia")+
+						"&secret="+Utils.getProperties().getProperty("secret-apptopia"),
 				null,
 				Login.class);
 	}
