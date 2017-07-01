@@ -43,9 +43,10 @@ public class Service {
 
     protected Bulk[] getDataDumps(String service, String dataset, String interval, String dateFrom, String date_to){
 
-        log.info("Getting data dumps URL's...");
+        log.info("Getting data dumps "+ dataset + " " + dateFrom + " to " + date_to + "...");
 
-        ResponseEntity<Bulk []> response = null;
+        ResponseEntity<Bulk []> response;
+        Bulk[] bulk;
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", login.getToken());
@@ -58,15 +59,16 @@ public class Service {
                             (interval.equals("") ? "" : ("&interval="+interval))
                     , HttpMethod.GET,
                     entity, Bulk[].class);
+            bulk = response.getBody();
             log.info("URL's successfully obteined...");
         }
         catch (RestClientException e) {
             log.error("Exception happened - here's what I know: ");
             log.error(e);
             Utils.sleep(Integer.parseInt(Utils.getProperties().getProperty("retry-time")));
-            getDataDumps(service, dataset, interval, dateFrom, date_to);
+            bulk = getDataDumps(service, dataset, interval, dateFrom, date_to);
         }
 
-        return response.getBody();
+        return bulk;
     }
 }
