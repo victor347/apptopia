@@ -1,59 +1,47 @@
 package client;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.stream.Stream;
 
-/**
- * Created by victo on 07/06/2017.
- */
 public class test {
 
-    public static void main (String args []){
+    public static void main(String args[]) {
 
         new test();
     }
 
     public test() {
 
-        File directory = new File("PublishersApple-600-2017-06-20");
-
-        if (directory.delete())
-            System.out.println("Carpeta " + directory.toString() + " borrada exitosamente");
-        else
-            System.out.println("Carpeta " + directory.toString() + " no se pudo borrar");
-
-
-
-    }
-
-
-
-    private String executeCommand(String command) {
-
-        StringBuffer output = new StringBuffer();
-
-        Process p;
-        try {
-            p = Runtime.getRuntime().exec(command);
-
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-            String line = null;
-            while ((line = reader.readLine())!= null) {
-                output.append(line + "\n");
-                System.out.println(line);
-            }
-            int exitVal = p.waitFor();
-            System.out.println("Exited with error code "+exitVal);
-
-        } catch (Exception e) {
+        try (Stream<String> input = Files.lines(Paths.get("part.json"));
+             PrintWriter output = new PrintWriter("part2.json", "UTF-8"))
+        {
+            input.map(s -> s.replaceAll(",\"id\":\"", ",\"id\":").replaceAll("\",\"breakout\":",",\"breakout\":"))
+                    .forEachOrdered(output::println);
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        return output.toString();
+    private String getDate(int days){
 
+        Calendar c = Calendar.getInstance();
+
+
+        return c.get(Calendar.YEAR)+
+                "-"+
+                ((c.get(Calendar.MONTH)+1) < 10 ? "0" : "")+
+                (c.get(Calendar.MONTH)+1)+
+                "-"+
+                ((c.get(Calendar.DATE)-days) < 10 ? "0" : "")+
+                (c.get(Calendar.DATE)-days);
     }
 
 }
