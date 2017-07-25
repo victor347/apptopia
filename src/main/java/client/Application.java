@@ -18,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.stream.Stream;
 
 @SpringBootApplication
 public class Application {
@@ -125,8 +127,6 @@ public class Application {
 			log.info("Files to download from Ratings_Apple " + bulk.length);
 
 			importFilesMongo(bulk, "RatingsApple-"+bulk.length+"-"+getDate(0), "\\part", Utils.MONGO_IMPORT_RATINGS_APPLE, Integer.parseInt(Utils.getProperties().getProperty("start-ratings-apple")), Integer.parseInt(Utils.getProperties().getProperty("end-ratings-apple")), "ratings-apple");
-
-
 		}
 
 		if(Boolean.parseBoolean(Utils.getProperties().getProperty("process-ratings-google"))){
@@ -147,7 +147,7 @@ public class Application {
 			bulk = service.getDataDumps(
 					Utils.getProperties().getProperty("apple-data-dumps-service"),
 					"daily_app_estimates",
-					"",
+					"quarter",
 					dateFrom,
 					dateTo);
 			log.info("Files to download from App_Estimates_Apple " + bulk.length);
@@ -247,7 +247,22 @@ public class Application {
 				continue;
 			}
 
-			executeCommand(command + dir + file + i);
+			if(collection.equals("app-estimates-apple")){
+
+				idToInt(dir + file + i);
+				executeCommand(command + dir + file + i + "-idInt");
+				try {
+
+					Files.delete(Paths.get(dir+file+i+ "-idInt"));
+					log.info("File "+ file + i + "-idInt deleted");
+				}
+				catch (IOException e) {
+					log.error("Exception happened - here's what I know: " + e);
+				}
+			}
+			else{
+				executeCommand(command + dir + file + i);
+			}
 
 			try {
 
@@ -264,6 +279,26 @@ public class Application {
 			log.error("Directory " + directory.toString() + " couldn't be deleted");
 
 		Utils.editProperty("process-"+collection,"false");
+	}
+
+	private void idToInt(String file) {
+
+		log.info("Casting id to int - File "+ file);
+		try (Stream<String> input = Files.lines(Paths.get(file));
+				  PrintWriter output = new PrintWriter(file+"-idInt", "UTF-8"))
+		{
+			input.map(s -> s.replaceAll(",\"id\":\"", ",\"id\":").replaceAll("\",\"breakout\":",",\"breakout\":").replaceAll("\"date\":\"","\"date\":ISODate(\"").replaceAll("\",\"iap_revenue\":","T00:00:00Z\"),\"iap_revenue\":"))
+					.forEachOrdered(output::println);
+
+			log.info("Casting Succesful - File " + file + "-idInt created");
+		}
+		catch (UnsupportedEncodingException e) {
+			log.error("Exception happened - here's what I know: " + e);
+		} catch (FileNotFoundException e) {
+			log.error("Exception happened - here's what I know: " + e);
+		} catch (IOException e) {
+			log.error("Exception happened - here's what I know: " + e);
+		}
 	}
 
 	private void executeCommand (String command)  {
